@@ -29,7 +29,7 @@
   .send { width:100%; margin-top:16px; padding:15px; border:0; border-radius:10px; background:var(--accent); color:#fff; font:inherit; font-size:1.08rem; cursor:pointer; }
   .send:disabled { opacity:.45; cursor:default; }
   .msg { color:#a03020; font-size:.92rem; margin-top:8px; min-height:1.2em; }
-  .pay { display:block; text-align:center; margin-top:14px; color:var(--accent); }
+  .pay { display:block; text-align:center; margin-top:12px; padding:14px; border:1px solid var(--accent); border-radius:10px; color:var(--accent); font-size:1.08rem; text-decoration:none; cursor:pointer; }
   [hidden] { display:none !important; }
   footer { margin-top:30px; text-align:center; color:var(--soft); font-size:.85rem; }
 </style>
@@ -52,12 +52,12 @@
   </label>
 
   <div class="total"><span>Estimated total</span><span id="total">$0</span></div>
-  <button class="send" id="send" disabled>Send my order</button>
+  <button class="send" id="send" disabled>Send order, pay at pickup</button>
   <div class="msg" id="msg"></div>
-  <a class="pay" id="pay" target="_blank" rel="noopener" hidden>Pay online: send your order first, then enter your total</a>
+  <a class="pay" id="pay" hidden>Pay here</a>
 
   <footer>
-    Orders are confirmed by reply. Pay online or at pickup.<br>
+    Orders are confirmed by reply. Tap Pay here to pay by card, or pay at pickup.<br>
     &copy; <span id="yr"></span> Bradley Soapery and Co., an eHut LLC brand.
   </footer>
 </main>
@@ -119,21 +119,35 @@ function refresh() {
   document.getElementById("msg").textContent = "";
 }
 
-document.getElementById("send").onclick = function () {
-  var buyer = document.getElementById("buyer").value.trim();
-  if (!buyer) { document.getElementById("msg").textContent = "Add your name first."; return; }
-  if (!document.getElementById("notes").value.trim()) {
-    document.getElementById("msg").textContent = "Tell us the scent, or the name on your label.";
-    return;
-  }
+function orderEmail(payNote) {
+  var msg = document.getElementById("msg");
   var lines = [];
   PRODUCTS.forEach(function (p, i) { if (qty[i] > 0) { lines.push(qty[i] + " x " + p.name); } });
+  if (!lines.length) { msg.textContent = "Add at least one item first."; return null; }
+  var buyer = document.getElementById("buyer").value.trim();
+  if (!buyer) { msg.textContent = "Add your name first."; return null; }
+  var notes = document.getElementById("notes").value.trim();
+  if (!notes) { msg.textContent = "Tell us the scent, or the name on your label."; return null; }
   var body = "Order from " + buyer + "\n\n" + lines.join("\n") +
-             "\n\nNotes: " + (document.getElementById("notes").value.trim() || "none") +
-             "\n\nEstimated total: " + document.getElementById("total").textContent;
-  window.location.href = "mailto:" + ORDER_EMAIL +
+             "\n\nNotes: " + notes +
+             "\n\nEstimated total: " + document.getElementById("total").textContent +
+             "\n\nPayment: " + payNote;
+  return "mailto:" + ORDER_EMAIL +
     "?subject=" + encodeURIComponent("Soapery order: " + buyer) +
     "&body=" + encodeURIComponent(body);
+}
+
+document.getElementById("send").onclick = function () {
+  var link = orderEmail("at pickup");
+  if (link) { window.location.href = link; }
+};
+
+document.getElementById("pay").onclick = function (e) {
+  e.preventDefault();
+  var link = orderEmail("paying online");
+  if (!link) { return; }
+  window.open(PAY_LINK, "_blank", "noopener");
+  window.location.href = link;
 };
 
 document.getElementById("buyer").oninput = function () { document.getElementById("msg").textContent = ""; };
