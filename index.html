@@ -30,6 +30,7 @@
   .send:disabled { opacity:.45; cursor:default; }
   .msg { color:#a03020; font-size:.92rem; margin-top:8px; min-height:1.2em; }
   .pay { display:block; text-align:center; margin-top:14px; color:var(--accent); }
+  [hidden] { display:none !important; }
   footer { margin-top:30px; text-align:center; color:var(--soft); font-size:.85rem; }
 </style>
 </head>
@@ -53,10 +54,10 @@
   <div class="total"><span>Estimated total</span><span id="total">$0</span></div>
   <button class="send" id="send" disabled>Send my order</button>
   <div class="msg" id="msg"></div>
-  <a class="pay" id="pay" hidden>Pay online</a>
+  <a class="pay" id="pay" target="_blank" rel="noopener" hidden>Pay online: send your order first, then enter your total</a>
 
   <footer>
-    Orders are confirmed by reply. Pay at pickup unless a payment link is shown.<br>
+    Orders are confirmed by reply. Pay online or at pickup.<br>
     &copy; <span id="yr"></span> Bradley Soapery and Co., an eHut LLC brand.
   </footer>
 </main>
@@ -77,7 +78,7 @@ var PRODUCTS = [
   { name: "Car scent",         desc: "Hanging car diffuser. Name the scent below", price: 3 }
 ];
 var ORDER_EMAIL = "ehut_llc@outlook.com";
-var PAY_LINK = "";
+var PAY_LINK = "https://buy.stripe.com/5kQ6oG11K1qT00n8j25gc07";
 /* ===== END OF EDIT SECTION ===== */
 
 var qty = PRODUCTS.map(function () { return 0; });
